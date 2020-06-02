@@ -5,12 +5,25 @@ const counter = require('./counter');
 
 var items = {};
 
+
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, { id, text });
+  console.log(text);
+  counter.getNextUniqueId((err, id) => {
+    //make new file path
+    let newTaskFile = path.join(exports.dataDir, id + '.txt');
+    // write file to data directory
+    fs.writeFile(newTaskFile, text, (err) => {
+      if (err) {
+        console.log('error on task create', err)
+        callback(err);
+      } else {
+        items[id] = text;
+        callback(null, { id, text });
+      }
+    })
+  });
 };
 
 exports.readAll = (callback) => {
