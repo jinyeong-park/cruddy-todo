@@ -12,7 +12,7 @@ exports.create = (text, callback) => {
   console.log(text);
   counter.getNextUniqueId((err, id) => {
     //make new file path
-    let newTaskFile = path.join(exports.dataDir, id + '.txt');
+    let newTaskFile = path.join(exports.dataDir, `${id}.txt`);
     // write file to data directory
     fs.writeFile(newTaskFile, text, (err) => {
       if (err) {
@@ -27,6 +27,9 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
+  // if there is no text in the data
+   // return empty array
+  // else  read all the text
   var data = _.map(items, (text, id) => {
     return { id, text };
   });
@@ -34,33 +37,48 @@ exports.readAll = (callback) => {
 };
 
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  //make path to id file in /data
+  let newTaskFile = path.join(exports.dataDir, `${id}.txt`);
+  // fs readfile
+  fs.readFile(newTaskFile, (err, text) => {
+    if (err) {
+      callback(new Error(`No item with id: ${id}`));
+    } else {
+      text = text.toString();
+      console.log({ id, text });
+      callback(null, { id, text });
+    }
+  })
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+  let newTaskFile = path.join(exports.dataDir, `${id}.txt`);
+  // read file to see if it exists
+  fs.readFile(newTaskFile, (err, fileData) => {
+    if (err) {
+      callback(new Error(`No item with id: ${id}`))
+    } else {
+      // Then write file with new text
+      fs.writeFile(newTaskFile, text, (err) => {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, { id, text });
+        }
+      })
+    }
+  })
 };
 
 exports.delete = (id, callback) => {
-  var item = items[id];
-  delete items[id];
-  if (!item) {
-    // report an error if item not found
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback();
-  }
+  let newTaskFile = path.join(exports.dataDir, `${id}.txt`);
+  fs.unlink(newTaskFile, (err) => {
+    if (err) {
+      callback(new Error(`No item with id: ${id}`));
+    } else {
+      callback(null)
+    }
+  })
 };
 
 // Config+Initialization code -- DO NOT MODIFY /////////////////////////////////

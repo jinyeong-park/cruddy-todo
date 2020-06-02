@@ -16,7 +16,7 @@ const zeroPaddedNumber = (num) => {
 };
 
 const readCounter = (callback) => {
-  //fs.readFile: Asynchronously reads the entire contents of a file
+  //fs.readFile(path, callback): Asynchronously reads the entire contents of a file
   fs.readFile(exports.counterFile, (err, fileData) => {
     if (err) {
       callback(null, 0);
@@ -42,22 +42,28 @@ const writeCounter = (count, callback) => {
 // // 2) use readCounter and writeCounter
 
 
+//callback :  error first callback
+exports.getNextUniqueId = () => {
+  counter = counter + 1;
+  return zeroPaddedNumber(counter);
+};
+
+
 
 exports.getNextUniqueId = (callback) => {
   //read file and set counter
   readCounter((err, data) => {
     if (err) {
-      // console.log('Read Error at getNextUniqueId')
+      console.log('Read Error at getNextUniqueId')
       callback(err)
     } else {
       counter = data;
       counter++;
       writeCounter(counter, (err, data) => {
         if (err) {
-          // console.log('Write Error at getNextUniqueId')
+          console.log('Write Error at getNextUniqueId')
           callback(err)
         } else {
-          // console.log('The file has been saved!');
           callback(null, zeroPaddedNumber(counter))
         }
       })
